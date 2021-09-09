@@ -1,7 +1,9 @@
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QVBoxLayout, QWidget
 import sys
-from points import Points
+from PointsWidget import PointsWidget
+from CommandsWidget import CommandWidget
 
 
 class MainWidget(QMainWindow):
@@ -15,14 +17,18 @@ class MainWidget(QMainWindow):
 
 		self.central_widget = QWidget()               
 		self.setCentralWidget(self.central_widget)    
+		self.central_widget.showFullScreen()
+
 		lay = QVBoxLayout(self.central_widget)
 
 		self.label = QLabel(self)
-		self.points = Points()
-		self.central_widget.showFullScreen()
-		lay.addWidget(self.points)
-		# lay.addWidget(self.echoText)
+		self.pointsWidget = PointsWidget([])
+		self.commandWidget = CommandWidget()
 
+		lay.addWidget(self.commandWidget)
+		lay.addWidget(self.pointsWidget)
+
+		lay.setAlignment(self.commandWidget,Qt.AlignTop)
 
 	def dragEnterEvent(self, event):
 		if event.mimeData().hasUrls():
@@ -40,6 +46,18 @@ class MainWidget(QMainWindow):
 			# self.resize(img.width(), img.height())
 			self.show()
 
+	def setImage(self,url,file):
+		self.IMAGE_URL = url
+		self.image = file
+	
+	def setJson(self,url,file):
+		self.JSON_URL = url
+		self.json = file
+	
+	def setNewJson(self,url,file):
+		self.JSON_URL = url
+		self.json = file
+	
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
