@@ -4,6 +4,10 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QHBoxLayout, QPushButton, QWidget
 
 class CommandWidget(QWidget):
+	setImage = pyqtSignal(str,QPixmap)
+	setJson = pyqtSignal(str)#json_obj)
+	newJson = pyqtSignal(str)
+
 	def __init__(self) -> None:
 		super().__init__()
 		layout = QHBoxLayout()
@@ -15,15 +19,11 @@ class CommandWidget(QWidget):
 		self.addImageBtn.clicked.connect(self.openImage)
 		# add json
 		self.addJsonBtn = QPushButton("add json")
-		self.addImageBtn.clicked.connect(self.openJson)
+		self.addJsonBtn.clicked.connect(self.openJson)
 		# new json
 		self.addNewJsonBtn = QPushButton("create new json")
 		self.addNewJsonBtn.clicked.connect(self.createJson)
 
-		#signals
-		self.setImage = pyqtSignal(str,QPixmap)
-		self.setJson = pyqtSignal(str)#json_obj)
-		self.newJson = pyqtSignal()
 
 		#add to layout
 		layout.addWidget(self.addImageBtn)
@@ -42,6 +42,7 @@ class CommandWidget(QWidget):
 	def openJson(self,filename=None):
 		if not filename:
 			filename, _ = QFileDialog.getOpenFileName(self, 'Select json', QDir.currentPath(), 'Json (*.json)')
+			print(filename)
 		if not filename:
 			return
 		
@@ -51,4 +52,4 @@ class CommandWidget(QWidget):
 	
 	def createJson(self,event):
 		# create new json object
-		self.newJson.emit()
+		self.newJson.emit("hello")

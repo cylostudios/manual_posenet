@@ -25,6 +25,10 @@ class MainWidget(QMainWindow):
 		self.pointsWidget = PointsWidget([])
 		self.commandWidget = CommandWidget()
 
+		self.commandWidget.setImage.connect(self.setImage)
+		self.commandWidget.setJson.connect(self.setJson)
+		self.commandWidget.newJson.connect(self.setNewJson)
+
 		lay.addWidget(self.commandWidget)
 		lay.addWidget(self.pointsWidget)
 
@@ -54,7 +58,8 @@ class MainWidget(QMainWindow):
 		self.JSON_URL = url
 		self.json = file
 	
-	def setNewJson(self,url,file):
+	def setNewJson(self,url,file=None):
+		print("newjson")
 		self.JSON_URL = url
 		self.json = file
 	
