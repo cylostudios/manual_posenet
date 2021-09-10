@@ -12,27 +12,41 @@ class MainWidget(QMainWindow):
 		super().__init__()
 
 		self.setWindowTitle("Drag and Drop")
-		self.resize(720, 480)
+		self.resize(900, 900)
 		self.setAcceptDrops(True)
 
 		self.central_widget = QWidget()               
 		self.setCentralWidget(self.central_widget)    
 		self.central_widget.showFullScreen()
 
-		lay = QVBoxLayout(self.central_widget)
-
+		layout = QVBoxLayout(self.central_widget)
+		# self.setLayout(layout)
+		#create widgets
 		self.label = QLabel(self)
-		self.pointsWidget = PointsWidget([])
+		self.pointsWidget = PointsWidget()
 		self.commandWidget = CommandWidget()
 
+		#style widgets
+		self.setStyleSheet("\
+			background-color:green;\
+		")
+		self.pointsWidget.setStyleSheet("width: 800;height: 600;background-color:white;border: 10px solid black;")
+		self.commandWidget.setStyleSheet("color: white; background-color:green; border: 1px solid black;")
+
+		#connections
 		self.commandWidget.setImage.connect(self.setImage)
-		self.commandWidget.setJson.connect(self.setJson)
-		self.commandWidget.newJson.connect(self.setNewJson)
+		self.commandWidget.setJson.connect(self.setPose)
+		self.commandWidget.newJson.connect(self.setPose)
+		self.commandWidget.saveSignal.connect(self.pointsWidget.save)
+		self.commandWidget.resetSignal.connect(self.pointsWidget.reset)
 
-		lay.addWidget(self.commandWidget)
-		lay.addWidget(self.pointsWidget)
+		# add to this
+		layout.addWidget(self.commandWidget)
+		layout.addWidget(self.pointsWidget)
 
-		lay.setAlignment(self.commandWidget,Qt.AlignTop)
+		# alignment
+		layout.setAlignment(self.commandWidget,Qt.AlignTop)
+		layout.setAlignment(self.pointsWidget,Qt.AlignTop | Qt.AlignCenter)
 
 	def dragEnterEvent(self, event):
 		if event.mimeData().hasUrls():
@@ -51,18 +65,18 @@ class MainWidget(QMainWindow):
 			self.show()
 
 	def setImage(self,url,file):
+		print("adding image - %s" % url)
 		self.IMAGE_URL = url
 		self.image = file
+		# emit file
+		self.pointsWidget.setImage(url,file)
 	
-	def setJson(self,url,file):
-		self.JSON_URL = url
-		self.json = file
-	
-	def setNewJson(self,url,file=None):
-		print("newjson")
-		self.JSON_URL = url
-		self.json = file
-	
+	def setPose(self,url,file=None):
+		print("adding pose - %s" % url)
+		self.POSE_URL = url
+		self.pose = file
+		# emit file
+		self.pointsWidget.setPose(url,file)
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
