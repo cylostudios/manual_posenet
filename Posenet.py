@@ -73,6 +73,7 @@ def loadJson(url=""):
 		return None
 
 def createJson():
-	pose = loadJson("./template.json")
+	# pose = loadJson("./template.json")
+	pose = loadJson("./yorke.json")
 
 	return pose

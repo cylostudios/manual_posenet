@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QRectF, pyqtSignal
+from PyQt5.QtCore import QPointF, QRectF, pyqtSignal
 from PyQt5.QtWidgets import  QWidget, QGridLayout
 import Posenet
 
@@ -13,7 +13,7 @@ class PointsWidget(QWidget):
 		self._width = width
 		self._height = height
 
-		self.circleSize = 5
+		self.circleSize = 25
 
 		self.setFixedWidth(width)
 		self.setFixedHeight(height)
@@ -25,11 +25,10 @@ class PointsWidget(QWidget):
 
 	def setPose(self,url,pose: Posenet.Pose):
 		self.pose = pose
-		self.pose = url
+		self.poseUrl = url
 		self.update()
 
 	def setImage(self,url,image: QtGui.QImage):
-		print("IMGGGGGG")
 		self.image = image
 		self.imageUrl = url
 		if(self.image.height() > self.image.width()):
@@ -55,30 +54,38 @@ class PointsWidget(QWidget):
 		painter.setBrush(QtGui.QColor(255,255,255,255))
 		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
-		print(self.pose,self.image)
 		if(self.pose is None or self.image is None):
-			print("NOIMGORJSON")
-			print(self.pose,self.image)
 			return
 
 		painter.setBrush(QtGui.QColor(0,0,0,255))
 		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
 		# painter = QtGui.QPainter(self)
-		pen = QtGui.QPen(QtGui.QColor(0,0,0,255))
-		pen.setWidth(5)
-		painter.setPen(pen)
+		# pen = QtGui.QPen(QtGui.QColor(0,0,0,255))
+		# pen.setWidth(5)
+		# painter.setPen(pen)
 
 		painter.setBrush(QtGui.QColor(255,255,255,255))
 		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
-		qrect = QtCore.QRectF(0.5 * self._width , 0.5 * self._height ,self.circleSize,self.circleSize)
 
 		painter.setBrush(QtGui.QColor(0,0,0,255))
 
-		painter.drawEllipse( qrect )
-
 		painter.drawImage(0,0,self.image)
+
+		for pidx in range(17):
+			if pidx < 5:
+				continue	
+
+			pose = self.pose.getPose(pidx)
+			point = QRectF( 
+				pose[0] * self.image.width(),
+				pose[1] * self.image.height(),
+				self.circleSize,
+				self.circleSize
+			)
+			painter.setBrush(QtGui.QColor(255,0,0,255))
+			painter.drawEllipse(point)
 		# i = QtGui.QPixmap()
 		# i.fromImage(self.image)
 		# painter.drawPixmap(QRectF(0,0,self.width,self.height),self.image)
@@ -106,4 +113,10 @@ class PointsWidget(QWidget):
 		self.pose.save()
 
 	def reset(self):
+		self.pose = None
+		self.poseUrl = "" 
+		self.image = None
+		self.imageUrl = "" 
 		print("reset")
+		self.update()
+

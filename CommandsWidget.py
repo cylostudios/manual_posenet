@@ -110,7 +110,7 @@ class CommandWidget(QWidget):
 		self.saveSignal.emit()
 
 	def reset(self):
-		self.saveSignal.emit()
+		self.resetSignal.emit()
 		self.resetBtn.hide()
 		self.saveBtn.hide()
 		self.addNewJsonBtn.show()

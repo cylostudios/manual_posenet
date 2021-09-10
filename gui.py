@@ -30,7 +30,7 @@ class MainWidget(QMainWindow):
 		self.setStyleSheet("\
 			background-color:green;\
 		")
-		self.pointsWidget.setStyleSheet("width: 800;height: 600;background-color:white;border: 10px solid black;")
+		self.pointsWidget.setStyleSheet("width: 800;height: 600;background-color:white;")
 		self.commandWidget.setStyleSheet("color: white; background-color:green; border: 1px solid black;")
 
 		#connections
