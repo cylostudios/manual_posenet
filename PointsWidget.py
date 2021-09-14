@@ -1,9 +1,10 @@
+from typing import List
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QPointF, QRectF, pyqtSignal
-from PyQt5.QtWidgets import  QWidget, QGridLayout
+from PyQt5.QtCore import QEvent, QPointF, QRect, QRectF, pyqtSignal, Qt
+from PyQt5.QtWidgets import  QGraphicsEllipseItem, QGraphicsScene, QGraphicsTextItem, QGraphicsView, QLabel, QWidget, QGridLayout
 import Posenet
 
-class PointsWidget(QWidget):
+class PointsWidget(QGraphicsView):
 
 	# jsonSet = pyqtSignal(str,Posenet.Pose)
 	# imageSet = pyqtSignal(str,QtGui.QPixmap)
@@ -13,100 +14,178 @@ class PointsWidget(QWidget):
 		self._width = width
 		self._height = height
 
-		self.circleSize = 25
+		# self.setStyleSheet("background-color: red;")
+
 
 		self.setFixedWidth(width)
 		self.setFixedHeight(height)
 
-		layout = QGridLayout()
-		self.setLayout(layout)
+		self._scene = QGraphicsScene()
+		self.setScene(self._scene)
+
+		self.scene()
+		self.points = []
+
+		# layout = QGridLayout()
+		# self.setLayout(layout)
 		self.pose = None
 		self.image = None
+
+		self.currentItem = None
+
+		self.drawScene()
+
 
 	def setPose(self,url,pose: Posenet.Pose):
 		self.pose = pose
 		self.poseUrl = url
+		self.points: List[Posenet.PosePoint] = []
+		
+		w = self.image.width() if self.image else 800
+		h = self.image.height() if self.image else 800 
+
+		for idx in range(len(self.pose.pose)):
+			_point = self.pose.getPose(idx)
+			point = Posenet.PosePoint(
+				idx,
+				_point[0],
+				_point[1],
+				w,
+				h,
+				self.pose.getPoseLabel(idx)
+			)
+
+			self.points.append(point)
+
+		self.pose.setPoints(self.points)
 		self.update()
+		self.drawScene()
 
 	def setImage(self,url,image: QtGui.QImage):
 		self.image = image
 		self.imageUrl = url
-		if(self.image.height() > self.image.width()):
-			# set to vertical size
-			# self.image.
-			pass
+
+		# self.setFixedWidth(self.image.width())
+		# self.setFixedHeight(self.image.height())
 
 		if(self.image.height() > self.image.width()):
 			# set to vertical size
+			self.image = self.image.scaled(self.width(),self.height(),Qt.KeepAspectRatio)
+			# self.image = self.image.scaled(self.width(),self.height())
+			pass
+
+		if(self.image.height() < self.image.width()):
+			# set to horizontal size
+			# self.image = self.image.scaled(100,100)
+			self.image = self.image.scaled(self.width(),self.height(),Qt.KeepAspectRatio)
+			# self.image = self.image.scaled(self.width(),self.height())
 			pass
 
 		if(self.image.height() == self.image.width()):
 			# set to scaled square
+			# self.image = self.image.scaled(100,100)
+			self.image = self.image.scaled(self.width(),self.height(),Qt.KeepAspectRatio)
+			# self.image = self.image.scaled(self.width(),self.height())
 			pass
 
 		self.update()
 
+		if self.points is not None:
+			for p in self.points: p.setImageDims(self.image.width(),self.image.height())
+
+		self.drawScene()
+
 	def setPoints(self,points):
-		self.points = points
+		# self.points = points
+		pass
 
-	def paintEvent(self, event):
-		painter = QtGui.QPainter(self)
-		painter.setBrush(QtGui.QColor(255,255,255,255))
-		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
+	def drawScene(self):
 		if(self.pose is None or self.image is None):
+			self.setStyleSheet("background-color: white;")
 			return
 
-		painter.setBrush(QtGui.QColor(0,0,0,255))
-		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
+		# self.setStyleSheet("background-color: white;")
+		img = QtGui.QPixmap().fromImage(self.image)
+		print(img.rect())
+		self.scene().addPixmap(img)
 
-		# painter = QtGui.QPainter(self)
-		# pen = QtGui.QPen(QtGui.QColor(0,0,0,255))
-		# pen.setWidth(5)
-		# painter.setPen(pen)
+		self.scene().addEllipse(QRectF(0,0,25,25),QtGui.QColor(0,0,255,255))
 
-		painter.setBrush(QtGui.QColor(255,255,255,255))
-		painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
+		# self.scene().setForegroundBrush(QtGui.QColor(255, 0, 0, 255))
+
+		for p in range(len(self.points)):
+			if p > 4:
+				print(self.pose.getPoseLabel(p) ,self.points[p].elipse)
+				self.scene().addEllipse(self.points[p].elipse, QtGui.QColor(255,0,0,255))
+				self.scene().addItem(self.points[p].text)
 
 
-		painter.setBrush(QtGui.QColor(0,0,0,255))
+	# def paintEvent(self, event):
+	# 	pass
+	# 	painter.setBrush(QtGui.QColor(255,255,255,255))
+	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
-		painter.drawImage(0,0,self.image)
+	# 	if(self.pose is None or self.image is None):
+	# 		return
 
-		for pidx in range(17):
-			if pidx < 5:
-				continue	
+	# 	painter.setBrush(QtGui.QColor(0,0,0,255))
+	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
-			pose = self.pose.getPose(pidx)
-			point = QRectF( 
-				pose[0] * self.image.width(),
-				pose[1] * self.image.height(),
-				self.circleSize,
-				self.circleSize
-			)
-			painter.setBrush(QtGui.QColor(255,0,0,255))
-			painter.drawEllipse(point)
-		# i = QtGui.QPixmap()
-		# i.fromImage(self.image)
-		# painter.drawPixmap(QRectF(0,0,self.width,self.height),self.image)
+	# 	# painter = QtGui.QPainter(self)
+	# 	# pen = QtGui.QPen(QtGui.QColor(0,0,0,255))
+	# 	# pen.setWidth(5)
+	# 	# painter.setPen(pen)
 
-	def mousePressEvent(self, event):
-		pass
-		# if self.rect.contains(event.pos()):
-		# 	self.drag_position = event.pos() - self.rect.topLeft()
-		# 	super().mousePressEvent(event)
+	# 	painter.setBrush(QtGui.QColor(255,255,255,255))
+	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
 
-	def mouseMoveEvent(self, event):
-		pass
-		# if not self.drag_position.isNull():
-		# 	self.rect.moveTopLeft(event.pos() - self.drag_position)
-		# 	self.update()
-		# 	super().mouseMoveEvent(event)
+
+	# 	painter.setBrush(QtGui.QColor(0,0,0,255))
+
+	# 	painter.drawImage(0,0,self.image)
+
+	# 	for pidx in range(17):
+	# 		if pidx < 5:
+	# 			continue	
+
+	# 		pose = self.pose.getPose(pidx)
+
+	# 		point = QRectF( 
+	# 			pose[0] * self.image.width(),
+	# 			pose[1] * self.image.height(),
+	# 			self.circleSize,
+	# 			self.circleSize
+	# 		)
+
+	# 		painter.setBrush(QtGui.QColor(255,0,0,255))
+	# 		painter.drawEllipse(point)
+
+	# 		pointCircle = QGraphicsEllipseItem(point)
+	# 		# self.layout().addChildWidget(pointCircle)
+
+
+	# 		# draw label
+
+	def mousePressEvent(self, event: QtGui.QMouseEvent):
+		pos = event.pos()
+		i = 0
+		print(pos)
+		for p in self.points:
+			i+=1
+			if p.elipse.contains(pos):
+				print("COMNE")
+				self.currentItem = p
+				break
+
+	def mouseMoveEvent(self, event: QtGui.QMouseEvent):
+		if( self.currentItem is not None):
+			ep = event.pos()
+			self.currentItem.move(ep)	
+			# self.drawScene()
 
 	def mouseReleaseEvent(self, event):
-		pass
-		# self.drag_position = QtCore.QPoint()
-		# super().mouseReleaseEvent(event)
+		self.currentItem = None
 
 	def save(self):
 		print("SAVE")
@@ -119,4 +198,6 @@ class PointsWidget(QWidget):
 		self.imageUrl = "" 
 		print("reset")
 		self.update()
+		self.scene().clear()
+		self.drawScene()
 

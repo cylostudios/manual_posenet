@@ -12,7 +12,9 @@ class MainWidget(QMainWindow):
 		super().__init__()
 
 		self.setWindowTitle("Drag and Drop")
-		self.resize(900, 900)
+		w = 1200
+		h = 800
+		self.resize(w,h)
 		self.setAcceptDrops(True)
 
 		self.central_widget = QWidget()               
@@ -23,14 +25,14 @@ class MainWidget(QMainWindow):
 		# self.setLayout(layout)
 		#create widgets
 		self.label = QLabel(self)
-		self.pointsWidget = PointsWidget()
+		self.pointsWidget = PointsWidget(w,h)
 		self.commandWidget = CommandWidget()
 
 		#style widgets
 		self.setStyleSheet("\
 			background-color:green;\
 		")
-		self.pointsWidget.setStyleSheet("width: 800;height: 600;background-color:white;")
+		# self.pointsWidget.setStyleSheet("width: 800;height: 600;background-color:white;")
 		self.commandWidget.setStyleSheet("color: white; background-color:green; border: 1px solid black;")
 
 		#connections
@@ -46,7 +48,7 @@ class MainWidget(QMainWindow):
 
 		# alignment
 		layout.setAlignment(self.commandWidget,Qt.AlignTop)
-		layout.setAlignment(self.pointsWidget,Qt.AlignTop | Qt.AlignCenter)
+		layout.setAlignment(self.pointsWidget,Qt.AlignTop )
 
 	def dragEnterEvent(self, event):
 		if event.mimeData().hasUrls():

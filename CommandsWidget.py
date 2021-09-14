@@ -54,11 +54,13 @@ class CommandWidget(QWidget):
 		self.show()
 
 	def openImage(self, filename=None):
-		if not filename:
-			filename, _ = QFileDialog.getOpenFileName(self, 'Select Photo', QDir.currentPath(), 'Images (*.png *.jpg)')
-		if not filename:
-			return
+		# if not filename:
+		# 	filename, _ = QFileDialog.getOpenFileName(self, 'Select Photo', QDir.currentPath(), 'Images (*.png *.jpg)')
+		# if not filename:
+		# 	return
 		
+		filename = "./yorke.jpg"
+
 		# image = QPixmap(filename)
 		image = QImage()
 		f = filename
@@ -116,7 +118,6 @@ class CommandWidget(QWidget):
 		self.addNewJsonBtn.show()
 		self.addImageBtn.show()
 		self.addJsonBtn.show()
-
 
 	def enableSR(self):
 		if( self.addImageBtn.isHidden() and ( self.addJsonBtn.isHidden() or self.addNewJsonBtn.isHidden())):
