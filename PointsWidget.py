@@ -6,9 +6,6 @@ import Posenet
 
 class PointsWidget(QGraphicsView):
 
-	# jsonSet = pyqtSignal(str,Posenet.Pose)
-	# imageSet = pyqtSignal(str,QtGui.QPixmap)
-
 	def __init__(self,width = 900,height = 800):
 		super().__init__()
 		self._width = width
@@ -26,12 +23,16 @@ class PointsWidget(QGraphicsView):
 		self.scene()
 		self.points = []
 
-		# layout = QGridLayout()
-		# self.setLayout(layout)
 		self.pose = None
 		self.image = None
 
+		#used for dragging
 		self.currentItem = None
+
+		# cycle functionality setup
+		self.togglePoints = False
+		self.currentTogglePoint = None
+
 
 		self.drawScene()
 
@@ -71,7 +72,8 @@ class PointsWidget(QGraphicsView):
 		if(self.image.height() > self.image.width()):
 			# set to vertical size
 			self.image = self.image.scaled(self.width(),self.height(),Qt.KeepAspectRatio)
-			# self.image = self.image.scaled(self.width(),self.height())
+			# self.image = self		# layout = QGridLayout()
+		# self.setLayout(layout).image.scaled(self.width(),self.height())
 			pass
 
 		if(self.image.height() < self.image.width()):
@@ -121,52 +123,6 @@ class PointsWidget(QGraphicsView):
 				self.scene().addItem(self.points[p].text)
 
 
-	# def paintEvent(self, event):
-	# 	pass
-	# 	painter.setBrush(QtGui.QColor(255,255,255,255))
-	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
-
-	# 	if(self.pose is None or self.image is None):
-	# 		return
-
-	# 	painter.setBrush(QtGui.QColor(0,0,0,255))
-	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
-
-	# 	# painter = QtGui.QPainter(self)
-	# 	# pen = QtGui.QPen(QtGui.QColor(0,0,0,255))
-	# 	# pen.setWidth(5)
-	# 	# painter.setPen(pen)
-
-	# 	painter.setBrush(QtGui.QColor(255,255,255,255))
-	# 	painter.drawRect(QtCore.QRect(0,0,self._width,self._height))
-
-
-	# 	painter.setBrush(QtGui.QColor(0,0,0,255))
-
-	# 	painter.drawImage(0,0,self.image)
-
-	# 	for pidx in range(17):
-	# 		if pidx < 5:
-	# 			continue	
-
-	# 		pose = self.pose.getPose(pidx)
-
-	# 		point = QRectF( 
-	# 			pose[0] * self.image.width(),
-	# 			pose[1] * self.image.height(),
-	# 			self.circleSize,
-	# 			self.circleSize
-	# 		)
-
-	# 		painter.setBrush(QtGui.QColor(255,0,0,255))
-	# 		painter.drawEllipse(point)
-
-	# 		pointCircle = QGraphicsEllipseItem(point)
-	# 		# self.layout().addChildWidget(pointCircle)
-
-
-	# 		# draw label
-
 	def mousePressEvent(self, event: QtGui.QMouseEvent):
 		pos = event.pos()
 		i = 0
@@ -188,7 +144,6 @@ class PointsWidget(QGraphicsView):
 		self.currentItem = None
 
 	def save(self):
-		print("SAVE")
 		self.pose.save()
 
 	def reset(self):
@@ -201,3 +156,53 @@ class PointsWidget(QGraphicsView):
 		self.scene().clear()
 		self.drawScene()
 
+	def getNextPoint(self):
+		print("getting next point")
+		if self.currentTogglePoint is None:
+			# idx 5 is the left shoulder
+			self.currentTogglePoint = (5,self.points[5])
+			self.currentTogglePoint[1].focus()
+			self.update()
+			return
+
+		lastPoint = self.currentTogglePoint
+		lastPoint[1].removeFocus()
+		newIdx = (lastPoint[0] + 1) % len(self.points)
+
+		# only activate body points
+		if newIdx <= 4:
+			newIdx = 5
+
+		self.currentTogglePoint = ( 
+			newIdx,
+			self.points[newIdx]
+		)
+		self.currentTogglePoint[1].focus()
+		self.update()
+		
+
+	def moveCurrentPoint(self):
+		if self.currentTogglePoint is not None:
+			print("moving point")
+			self.currentTogglePoint[1].move(QPointF(0,0))
+			self.update()
+
+	def keyPressEvent(self,event):
+		t = 84
+		o = 79 
+		n = 78
+		if event.key() == t:
+			# enable / disable individual selection 
+			self.togglePoints = not self.togglePoints
+			print("toggle = " , self.togglePoints)
+			return
+
+		if event.key() == o:
+			# move current selection to 0,0 
+			self.moveCurrentPoint()
+			return
+
+		if event.key() == n:
+			# cycle through points 
+			self.getNextPoint()
+			return

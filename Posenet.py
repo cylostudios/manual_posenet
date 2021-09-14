@@ -62,12 +62,13 @@ class PosePoint():
 		self.focus = 0
 	
 	def move(self, point):
-		# print("moving text from %f, %f to %f, %f" % (
-		# 	self.text.x(),
-		# 	self.text.y(),
-		# 	point.x(),
-		# 	point.y()
-		# ) )
+		print("moving %s from %f, %f to %f, %f" % (
+			pose_defs[self.idx],
+			self.text.x(),
+			self.text.y(),
+			point.x(),
+			point.y()
+		) )
 		self.text.setPos(point)
 		# trigger redraw!
 		# print("moving elipse from %f, %f to %f, %f" % (
@@ -86,6 +87,14 @@ class PosePoint():
 	def setColor(self,color):
 		self.text.setDefaultTextColor(color)
 		# self.elipse
+
+	def focus(self):
+		blue = QColor(0,0,255,255)
+		self.setColor(blue)
+
+	def removeFocus(self):
+		red = QColor(255,0,0,255)
+		self.setColor(red)
 
 	def setImageDims(self, w, h):
 		self.w = w

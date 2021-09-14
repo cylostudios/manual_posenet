@@ -54,12 +54,12 @@ class CommandWidget(QWidget):
 		self.show()
 
 	def openImage(self, filename=None):
-		# if not filename:
-		# 	filename, _ = QFileDialog.getOpenFileName(self, 'Select Photo', QDir.currentPath(), 'Images (*.png *.jpg)')
-		# if not filename:
-		# 	return
+		if not filename:
+			filename, _ = QFileDialog.getOpenFileName(self, 'Select Photo', QDir.currentPath(), 'Images (*.png *.jpg)')
+		if not filename:
+			return
 		
-		filename = "./yorke.jpg"
+		# filename = "./yorke.jpg"
 
 		# image = QPixmap(filename)
 		image = QImage()
