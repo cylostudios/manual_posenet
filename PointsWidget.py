@@ -187,6 +187,11 @@ class PointsWidget(QGraphicsView):
 			self.currentTogglePoint[1].move(QPointF(0,0))
 			self.update()
 
+	def resetTogglePoint(self):
+		if self.currentTogglePoint is not None:
+			self.currentTogglePoint[1].removeFocus() 
+			self.currentTogglePoint = None
+
 	def keyPressEvent(self,event):
 		t = 84
 		o = 79 
@@ -194,7 +199,10 @@ class PointsWidget(QGraphicsView):
 		if event.key() == t:
 			# enable / disable individual selection 
 			self.togglePoints = not self.togglePoints
-			print("toggle = " , self.togglePoints)
+			if self.togglePoints is not None:
+				self.getNextPoint()
+			else:
+				self.resetTogglePoint()
 			return
 
 		if event.key() == o:
